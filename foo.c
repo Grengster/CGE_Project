@@ -29,7 +29,8 @@
 int window;
 float advance = 0.0f;
 float sideways = 0.0f;
-GLuint texture;
+GLuint texwall;
+GLuint texfloor;
 int animating = 1;
 
 int moving = 0;     /* flag that is true while mouse moves */
@@ -84,62 +85,85 @@ void keyPressed(unsigned char key, int x, int y)
     default:
         break;
     case 'w':     /* <cursor up> */
-        advance -= 0.1f;
+        advance -= 0.2f;
         glutPostRedisplay();
         break;
     case 'a':     /* <cursor up> */
-        sideways -= 0.1f;
+        sideways -= 0.2f;
         glutPostRedisplay();
         break;
     case 's':     /* <cursor down> */
-        advance += 0.1f;
+        advance += 0.2f;
         glutPostRedisplay();
         break;
     case 'd':     /* <cursor down> */
-        sideways += 0.1f;
+        sideways += 0.2f;
         glutPostRedisplay();
+        break;
+    case 'u':     /* <cursor up> */
+        glTexCoord2f(5.0f, 5.0f); glVertex3f(-5.0f, -5.0f, -5.0f);
+        
+        break;
+    case 'i':     /* <cursor up> */
+        glTexCoord2f(0.0f, 5.0f); glVertex3f(5.0f, -5.0f, -5.0f);
+        
+        break;
+    case 'o':     /* <cursor down> */
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(5.0f, -5.0f, 5.0f);
+        
+        break;
+    case 'p':     /* <cursor down> */
+        glTexCoord2f(5.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
+        break;
+
+    case 'j':     /* <cursor down> */
+        glPushMatrix();
+        break;
+    case 'k':     /* <cursor down> */
+        glPopMatrix();
         break;
     }
 }
 
-void drawCube()
+void drawCube(int i)
 {
     glBegin(GL_QUADS);
     // front face
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(1.0f, 1.0f, 1.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f, 1.0f, 1.0f);
-    // back face
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(1.0f, 1.0f, -1.0f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(1.0f, -1.0f, -1.0f);
-    // top face
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, 1.0f, 1.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(1.0f, 1.0f, 1.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(1.0f, 1.0f, -1.0f);
-    // bottom face
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(1.0f, -1.0f, -1.0f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-    // right face
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(1.0f, -1.0f, -1.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(1.0f, 1.0f, -1.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(1.0f, 1.0f, 1.0f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-    // left face
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, 1.0f, 1.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
+    switch (i)
+    {
+    case 1: //FACE/BACK
+    {
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
+        glTexCoord2f(3.0f, 0.0f); glVertex3f(5.0f, -5.0f, 5.0f);
+        glTexCoord2f(3.0f, 3.0f); glVertex3f(5.0f, 5.0f, 5.0f);
+        glTexCoord2f(0.0f, 3.0f); glVertex3f(-5.0f, 5.0f, 5.0f);
+        break;
+    }
+    case 2: //LEFT/RIGHT
+    {
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-5.0f, -5.0f, -5.0f);
+        glTexCoord2f(3.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
+        glTexCoord2f(3.0f, 3.0f); glVertex3f(-5.0f, 5.0f, 5.0f);
+        glTexCoord2f(0.0f, 3.0f); glVertex3f(-5.0f, 5.0f, -5.0f);
+        break;
+    }
+    case 3: //BOTTOM/TOP
+    {
+        glTexCoord2f(3.0f, 5.0f); glVertex3f(-5.0f, -5.0f, -5.0f);
+        glTexCoord2f(0.0f, 5.0f); glVertex3f(5.0f, -5.0f, -5.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(5.0f, -5.0f, 5.0f);
+        glTexCoord2f(3.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
+        break;
+    }
+    default:
+        break;
+    }
     glEnd();
 }
 
 void display()
 {
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
@@ -149,30 +173,29 @@ void display()
 
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texwall);
 
     glTranslatef(0, 0, -advance);
     glTranslatef(-sideways, 0, 0);
-
+    
     glPushMatrix();
-    glTranslatef(-2, 0, 0);
-    glTranslatef(0, 0, 4);
-    drawCube();
-    glTranslatef(0, 0, -4);
-    drawCube();
-    glTranslatef(0, 0, -4);
-    drawCube();
+    glTranslatef(0, 3, 4);
+    drawCube(3);
+    glBindTexture(GL_TEXTURE_2D, texfloor);
+    drawCube(1);
+    glTranslatef(0, 0, -10);
+    drawCube(1);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(2, 0, 0);
-    glTranslatef(0, 0, 4);
-    drawCube();
-    glTranslatef(0, 0, -4);
-    drawCube();
-    glTranslatef(0, 0, -4);
-    drawCube();
+    glTranslatef(0, 3, 4);
+    drawCube(2);
+    glTranslatef(10, 0, 0);
+    drawCube(2);
+    
     glPopMatrix();
+
+    
 
     glDisable(GL_TEXTURE_2D);
 
@@ -193,10 +216,10 @@ void init(int width, int height)
     tgaInfo* info = 0;
     int mode;
 
-    info = tgaLoad("crate.tga");
+    info = tgaLoad("textures/stonefloor.tga");
 
     if (info->status != TGA_OK) {
-        fprintf(stderr, "error loading texture image: %d\n", info->status);
+        fprintf(stderr, "error loading texwall image: %d\n", info->status);
 
         return;
     }
@@ -207,25 +230,65 @@ void init(int width, int height)
     }
 
     mode = info->pixelDepth / 8;  // will be 3 for rgb, 4 for rgba
-    glGenTextures(1, &texture);
+    glGenTextures(1, &texwall);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texwall);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
-    // Upload the texture bitmap. 
+    // Upload the texwall bitmap. 
     w = info->width;
     h = info->height;
 
-    reportGLError("before uploading texture");
+    reportGLError("before uploading texwall");
     GLint format = (mode == 4) ? GL_RGBA : GL_RGB;
     glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format,
         GL_UNSIGNED_BYTE, info->imageData);
-    reportGLError("after uploading texture");
+    reportGLError("after uploading texwall");
+
+    tgaDestroy(info);
+
+
+    //OTHER texwall HERE
+
+
+    info = tgaLoad("textures/stonewall2.tga");
+
+    if (info->status != TGA_OK) {
+        fprintf(stderr, "error loading texwall image: %d\n", info->status);
+
+        return;
+    }
+    if (info->width != info->height) {
+        fprintf(stderr, "Image size %d x %d is not rectangular, giving up.\n",
+            info->width, info->height);
+        return;
+    }
+
+    mode = info->pixelDepth / 8;  // will be 3 for rgb, 4 for rgba
+    glGenTextures(1, &texfloor);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glBindTexture(GL_TEXTURE_2D, texfloor);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+
+    // Upload the texwall bitmap. 
+    w = info->width;
+    h = info->height;
+
+    reportGLError("before uploading texwall");
+    format = (mode == 4) ? GL_RGBA : GL_RGB;
+    glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format,
+        GL_UNSIGNED_BYTE, info->imageData);
+    reportGLError("after uploading texwall");
 
     tgaDestroy(info);
 
