@@ -29,8 +29,8 @@
 int window;
 float advance = 0.0f;
 float sideways = 0.0f;
-GLuint texwall;
 GLuint texfloor;
+GLuint texwall;
 int animating = 1;
 
 int moving = 0;     /* flag that is true while mouse moves */
@@ -100,32 +100,10 @@ void keyPressed(unsigned char key, int x, int y)
         sideways += 0.2f;
         glutPostRedisplay();
         break;
-    case 'u':     /* <cursor up> */
-        glTexCoord2f(5.0f, 5.0f); glVertex3f(-5.0f, -5.0f, -5.0f);
-        
-        break;
-    case 'i':     /* <cursor up> */
-        glTexCoord2f(0.0f, 5.0f); glVertex3f(5.0f, -5.0f, -5.0f);
-        
-        break;
-    case 'o':     /* <cursor down> */
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(5.0f, -5.0f, 5.0f);
-        
-        break;
-    case 'p':     /* <cursor down> */
-        glTexCoord2f(5.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
-        break;
-
-    case 'j':     /* <cursor down> */
-        glPushMatrix();
-        break;
-    case 'k':     /* <cursor down> */
-        glPopMatrix();
-        break;
     }
 }
 
-void drawCube(int i)
+void drawPlain(int i)
 {
     glBegin(GL_QUADS);
     // front face
@@ -133,32 +111,137 @@ void drawCube(int i)
     {
     case 1: //FACE/BACK
     {
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
-        glTexCoord2f(3.0f, 0.0f); glVertex3f(5.0f, -5.0f, 5.0f);
-        glTexCoord2f(3.0f, 3.0f); glVertex3f(5.0f, 5.0f, 5.0f);
-        glTexCoord2f(0.0f, 3.0f); glVertex3f(-5.0f, 5.0f, 5.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-2.0f, -2.0f, 0.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(2.0f, -2.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(2.0f, 2.0f, 0.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-2.0f, 2.0f, 0.0f);
         break;
     }
     case 2: //LEFT/RIGHT
     {
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-5.0f, -5.0f, -5.0f);
-        glTexCoord2f(3.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
-        glTexCoord2f(3.0f, 3.0f); glVertex3f(-5.0f, 5.0f, 5.0f);
-        glTexCoord2f(0.0f, 3.0f); glVertex3f(-5.0f, 5.0f, -5.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.0f, -2.0f, -2.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-0.0f, -2.0f, 2.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-0.0f, 2.0f, 2.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.0f, 2.0f, -2.0f);
         break;
     }
     case 3: //BOTTOM/TOP
     {
-        glTexCoord2f(3.0f, 5.0f); glVertex3f(-5.0f, -5.0f, -5.0f);
-        glTexCoord2f(0.0f, 5.0f); glVertex3f(5.0f, -5.0f, -5.0f);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(5.0f, -5.0f, 5.0f);
-        glTexCoord2f(3.0f, 0.0f); glVertex3f(-5.0f, -5.0f, 5.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-2.0f, -2.0f, -2.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(2.0f, -2.0f, -2.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(2.0f, -2.0f, 2.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-2.0f, -2.0f, 2.0f);
         break;
     }
     default:
         break;
     }
     glEnd();
+}
+
+void drawFloorCeilingRoom()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            drawPlain(3);
+            glTranslatef(4.0f, 0.0f, 0.0f);
+        }
+        glTranslatef(-12.0f, 0.0f, 4.0f);
+    }
+}
+
+void drawFrontWallRoom()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (i == 0 && j == 1)
+            {
+                glTranslatef(4.0f, 0.0f, 0.0f);
+            }
+            else
+            {
+                drawPlain(1);
+                glTranslatef(4.0f, 0.0f, 0.0f);
+            }
+        }
+        glTranslatef(-12.0f, 4.0f, 0.0f);
+    }
+}
+
+void drawBackWallRoom()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            drawPlain(1);
+            glTranslatef(4.0f, 0.0f, 0.0f);
+        }
+        glTranslatef(-12.0f, 4.0f, 0.0f);
+    }
+}
+
+void drawSideWallRoom()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            drawPlain(2);
+            glTranslatef(0.0f, 0.0f, -4.0f);
+        }
+        glTranslatef(0.0f, 4.0f, 12.0f);
+    }
+}
+
+void drawPassageFloor()
+{
+    glTranslatef(0.0f, 0.0f, -4.0f);
+    for (int i = 0; i < 10; i++)
+    {
+        drawPlain(3);
+        glTranslatef(0.0f, 0.0f, -4.0f);
+    }
+    glTranslatef(0.0f, 0.0f, 40.0f);
+}
+
+void drawPassageWalls()
+{
+    glTranslatef(-2.0f, 0.0f, 0.0f);
+    //Left
+    for (int i = 0; i < 10; i++)
+    {
+        drawPlain(2);
+        glTranslatef(0.0f, 4.0f, 0.0f);
+        drawPlain(2);
+        glTranslatef(0.0f, -4.0f, -4.0f);
+    }
+    glTranslatef(4.0f, 0.0f, 40.0f); //Reset
+    //Right
+    for (int i = 0; i < 10; i++)
+    {
+        drawPlain(2);
+        glTranslatef(0.0f, 4.0f, 0.0f);
+        drawPlain(2);
+        glTranslatef(0.0f, -4.0f, -4.0f);
+    }
+    //Back Wall
+    glTranslatef(-2.0f, 0.0f, 2.0f);
+    drawPlain(1);
+    glTranslatef(0.0f, 4.0f, 0.0f);
+    drawPlain(1);
+    //Ceiling
+    glTranslatef(0.0f, 4.0f, 2.0f);
+    for (int i = 0; i < 10; i++)
+    {
+        drawPlain(3);
+        glTranslatef(0.0f, 0.0f, 4.0f);
+    }
+    glTranslatef(0.0f, -8.0f, 0.0f); //Reset
 }
 
 void display()
@@ -173,29 +256,52 @@ void display()
 
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    glBindTexture(GL_TEXTURE_2D, texwall);
+    glBindTexture(GL_TEXTURE_2D, texfloor);
 
     glTranslatef(0, 0, -advance);
     glTranslatef(-sideways, 0, 0);
     
     glPushMatrix();
-    glTranslatef(0, 3, 4);
-    drawCube(3);
+    //Drawing the floor
+    glTranslatef(-4.0f, 0.0f, -4.0f); //Setting Start point
+    drawFloorCeilingRoom();
+    glTranslatef(4.0f, 0.0f, -4.0f); //Resetting back to start
+
+    glBindTexture(GL_TEXTURE_2D, texwall);
+
+    //Drawing Ceiling
+    glTranslatef(-4.0f, 12.0f, -4.0f); //Setting Start point
+    drawFloorCeilingRoom();
+    glTranslatef(4.0f, -12.0f, -8.0f); //Resetting back to start
+
+    //Drawing Front Wall
+    glTranslatef(-4.0f, 0.0f, -10.0f); //Setting Start point
+    drawFrontWallRoom();
+    glTranslatef(4.0f, -12.0f, 4.0f); //Resetting back to start
+
+    //Drawing Back Wall
+    glTranslatef(-4.0f, 0.0f, 8.0f); //Setting Start point
+    drawBackWallRoom();
+    glTranslatef(4.0f, -12.0f, -6.0f); //Resetting back to start
+
+    //Drawing Left Wall
+    glTranslatef(-6.0f, 0.0f, 4.0f); //Setting Start point
+    drawSideWallRoom();
+    glTranslatef(6.0f, -12.0f, -4.0f); //Resetting back to start
+
+    //Drawing Right Wall
+    glTranslatef(6.0f, 0.0f, 4.0f); //Setting Start point
+    drawSideWallRoom();
+    glTranslatef(-6.0f, -12.0f, -4.0f); //Resetting back to start
+
     glBindTexture(GL_TEXTURE_2D, texfloor);
-    drawCube(1);
-    glTranslatef(0, 0, -10);
-    drawCube(1);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0, 3, 4);
-    drawCube(2);
-    glTranslatef(10, 0, 0);
-    drawCube(2);
+    glTranslatef(0.0f, 0.0f, -4.0f); //Setting Start point
+    drawPassageFloor();
+    glBindTexture(GL_TEXTURE_2D, texwall);
+    drawPassageWalls();
+    
     
     glPopMatrix();
-
-    
 
     glDisable(GL_TEXTURE_2D);
 
@@ -230,10 +336,10 @@ void init(int width, int height)
     }
 
     mode = info->pixelDepth / 8;  // will be 3 for rgb, 4 for rgba
-    glGenTextures(1, &texwall);
+    glGenTextures(1, &texfloor);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glBindTexture(GL_TEXTURE_2D, texwall);
+    glBindTexture(GL_TEXTURE_2D, texfloor);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -270,10 +376,10 @@ void init(int width, int height)
     }
 
     mode = info->pixelDepth / 8;  // will be 3 for rgb, 4 for rgba
-    glGenTextures(1, &texfloor);
+    glGenTextures(1, &texwall);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glBindTexture(GL_TEXTURE_2D, texfloor);
+    glBindTexture(GL_TEXTURE_2D, texwall);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
