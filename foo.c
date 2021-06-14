@@ -32,6 +32,7 @@ float sideways = 0.0f;
 float objectMovement = 0.0f;
 GLuint texfloor;
 GLuint texwall;
+GLuint texscare;
 int animating = 1;
 
 int moving = 0;     /* flag that is true while mouse moves */
@@ -355,6 +356,14 @@ void display()
     glTranslatef(objectMovement, 0.0f, 0.0f);
     DrawCube();
     glTranslatef(-objectMovement, 0.0f, 0.0f);
+
+    if (advance < -40.0f)
+    {
+        glBindTexture(GL_TEXTURE_2D, texscare);
+        glTranslatef(0.0f, 0.0f, advance);
+        DrawCube();
+        glTranslatef(0.0f, 0.0f, -advance);
+    }
     
     glPopMatrix();
 
@@ -453,6 +462,44 @@ void init(int width, int height)
 
     tgaDestroy(info);
 
+    //OTHER texscare HERE
+
+
+    info = tgaLoad("textures/surprise.tga");
+
+    if (info->status != TGA_OK) {
+        fprintf(stderr, "error loading texwall image: %d\n", info->status);
+
+        return;
+    }
+    if (info->width != info->height) {
+        fprintf(stderr, "Image size %d x %d is not rectangular, giving up.\n",
+            info->width, info->height);
+        return;
+    }
+
+    mode = info->pixelDepth / 8;  // will be 3 for rgb, 4 for rgba
+    glGenTextures(1, &texscare);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glBindTexture(GL_TEXTURE_2D, texscare);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+
+    // Upload the texwall bitmap. 
+    w = info->width;
+    h = info->height;
+
+    reportGLError("before uploading texwall");
+    format = (mode == 4) ? GL_RGBA : GL_RGB;
+    glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format,
+        GL_UNSIGNED_BYTE, info->imageData);
+    reportGLError("after uploading texwall");
+
+    tgaDestroy(info);
 }
 
 void timer(int value)
