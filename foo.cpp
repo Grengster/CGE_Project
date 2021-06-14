@@ -10,8 +10,10 @@
 #include <stdlib.h> // for exit
 #include <stdio.h>
 #include "tga.h"
-
+#include <iostream>
+#include <cstring>
 #include <math.h>
+
 
 /* some math.h files don't define pi... */
 #ifndef M_PI
@@ -25,6 +27,13 @@
 #define cosf(x) ((float)cos((x)))
 #define atan2f(x, y) ((float)atan2((x), (y)))
 #endif 
+
+GLfloat WHITE[] = { 1, 1, 1 };
+GLfloat RED[] = { 1, 0, 0 };
+GLfloat GREEN[] = { 0, 1, 0 };
+GLfloat MAGENTA[] = { 1, 0, 1 };
+
+
 
 int window;
 float advance = 0.0f;
@@ -40,6 +49,42 @@ int begin_x = 0;        /* x value of mouse movement */
 int begin_y = 0;      /* y value of mouse movement */
 GLfloat angle_y = 0;  /* angle of spin around y axis of scene, in degrees */
 GLfloat angle_x = 0;  /* angle of spin around x axis  of scene, in degrees */
+
+class Ball {
+    double radius;
+    GLfloat* color;
+    double maximumHeight;
+    double x;
+    double y;
+    double z;
+    int direction;
+public:
+    Ball(double r, GLfloat* c, double h, double x, double z) :
+        radius(r), color(c), maximumHeight(h), direction(-1),
+        y(h), x(x), z(z) {
+    }
+    void update() {
+        y += direction * 0.05;
+        if (y > maximumHeight) {
+            y = maximumHeight; direction = -1;
+        }
+        else if (y < radius) {
+            y = radius; direction = 1;
+        }
+        glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, color);
+        glTranslated(x, y, z);
+        glutSolidSphere(radius, 30, 30);
+        glPopMatrix();
+    }
+};
+
+Ball balls[] = {
+  Ball(1, GREEN, 4, 6, 1),
+  Ball(1.5, MAGENTA, 7, 3, 4),
+  Ball(0.4, WHITE, 9, 1, 7)
+};
+
 
 void reportGLError(const char* msg)
 {
@@ -67,10 +112,7 @@ void resize(int width, int height)
 
 void specialKeyPressed(unsigned char key, int x, int y)
 {
-    switch (key) {
 
-
-    }
 }
 
 void keyPressed(unsigned char key, int x, int y)
@@ -131,6 +173,8 @@ void keyPressed(unsigned char key, int x, int y)
         break;
     }
 }
+
+
 
 void drawPlain(int i)
 {
@@ -303,6 +347,15 @@ void display()
         0., 0., 0.,
         0., 1., 0.);
 
+    glPushMatrix();
+    glTranslatef(-6.0f, 0.0f, -6.0f);
+    
+    for (int i = 0; i < sizeof balls / sizeof(Ball); i++) {
+        balls[i].update();
+    }
+
+    glPopMatrix();
+
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     glBindTexture(GL_TEXTURE_2D, texfloor);
@@ -310,7 +363,7 @@ void display()
     glTranslatef(0, 0, -advance);
     glTranslatef(-sideways, 0, 0);
     
-    glPushMatrix();
+    
 
     glTranslatef(0.0f, 0.0f, -4.0f);
 
@@ -364,7 +417,6 @@ void display()
         DrawCube();
         glTranslatef(0.0f, 0.0f, -advance);
     }
-    
     glPopMatrix();
 
     glDisable(GL_TEXTURE_2D);
@@ -378,6 +430,12 @@ void init(int width, int height)
     glClearDepth(1.0);
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, WHITE);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, WHITE);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, WHITE);
+    glMaterialf(GL_FRONT, GL_SHININESS, 30);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
     glShadeModel(GL_SMOOTH);
 
     resize(width, height);
@@ -386,7 +444,12 @@ void init(int width, int height)
     tgaInfo* info = 0;
     int mode;
 
-    info = tgaLoad("textures/stonefloor.tga");
+    std::string str = "textures/stonefloor.tga";
+    char* cstr = new char[str.length() + 1];
+    strcpy(cstr, str.c_str());
+    // do stuff
+    info = tgaLoad(cstr);
+    delete[] cstr;
 
     if (info->status != TGA_OK) {
         fprintf(stderr, "error loading texwall image: %d\n", info->status);
@@ -422,11 +485,13 @@ void init(int width, int height)
 
     tgaDestroy(info);
 
-
-    //OTHER texwall HERE
-
-
-    info = tgaLoad("textures/stonewall2.tga");
+     str = "textures/stonewall2.tga";
+    cstr = new char[str.length() + 1];
+    strcpy(cstr, str.c_str());
+    // do stuff
+    info = tgaLoad(cstr);
+    delete[] cstr;
+    
 
     if (info->status != TGA_OK) {
         fprintf(stderr, "error loading texwall image: %d\n", info->status);
@@ -462,10 +527,13 @@ void init(int width, int height)
 
     tgaDestroy(info);
 
-    //OTHER texscare HERE
 
-
-    info = tgaLoad("textures/surprise.tga");
+    str = "textures/surprise.tga";
+    cstr = new char[str.length() + 1];
+    strcpy(cstr, str.c_str());
+    // do stuff
+    info = tgaLoad(cstr);
+    delete[] cstr;
 
     if (info->status != TGA_OK) {
         fprintf(stderr, "error loading texwall image: %d\n", info->status);
@@ -561,7 +629,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(&display);
     glutReshapeFunc(&resize);
     glutKeyboardFunc(&keyPressed);
-    glutSpecialFunc(&specialKeyPressed);
+    //glutSpecialFunc(&specialKeyPressed);
     init(640, 480);
     glutTimerFunc(15, timer, 1);
     glutMouseFunc(mouse);
