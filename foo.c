@@ -29,6 +29,7 @@
 int window;
 float advance = 0.0f;
 float sideways = 0.0f;
+float objectMovement = 0.0f;
 GLuint texfloor;
 GLuint texwall;
 int animating = 1;
@@ -82,23 +83,50 @@ void keyPressed(unsigned char key, int x, int y)
         animating = animating ? 0 : 1;
         glutPostRedisplay();
         break;
-    default:
-        break;
     case 'w':     /* <cursor up> */
-        advance -= 0.2f;
-        glutPostRedisplay();
+        if (!(advance <= -49.0f || (sideways > 1.0f && advance < -8.0f) || (sideways < -1.0f && advance < -8.0f)))
+        {
+            advance -= 0.5f;
+            glutPostRedisplay();
+        }
         break;
     case 'a':     /* <cursor up> */
-        sideways -= 0.2f;
-        glutPostRedisplay();
+        if (!(sideways <= -4.8f || (advance <= -8.0 && sideways <= -1.0)))
+        {
+            sideways -= 0.2f;
+            glutPostRedisplay();
+        }
         break;
     case 's':     /* <cursor down> */
-        advance += 0.2f;
-        glutPostRedisplay();
+        if (advance < 1.0f)
+        {
+            advance += 0.5f;
+            glutPostRedisplay();
+        }
         break;
     case 'd':     /* <cursor down> */
-        sideways += 0.2f;
+        if (!(sideways >= 4.8f || (advance <= -8.0 && sideways >= 1.0)))
+        {
+            sideways += 0.2f;
+            glutPostRedisplay();
+        }
+        break;
+    case 'e':
+        if (objectMovement < 3.9f)
+        {
+            objectMovement += 0.1f;
+            glutPostRedisplay();
+        }
+        break;
+    case 'q':
+        if (objectMovement > -3.9f)
+        {
+            objectMovement -= 0.1f;
+            glutPostRedisplay();
+        }
         glutPostRedisplay();
+        break;
+    default:
         break;
     }
 }
@@ -133,10 +161,30 @@ void drawPlain(int i)
         glTexCoord2f(1.0f, 0.0f); glVertex3f(-2.0f, -2.0f, 2.0f);
         break;
     }
+    case 4: //LEFT/RIGHT (SMALL)
+    {
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.0f, -2.0f, -2.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-0.0f, -2.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-0.0f, 2.0f, 0.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.0f, 2.0f, -2.0f);
+        break;
+    }
     default:
         break;
     }
     glEnd();
+}
+
+void DrawCube()
+{
+    drawPlain(1);
+    glTranslatef(-2.0f, 0.0f, 0.0f);
+    drawPlain(4);
+    glTranslatef(4.0f, 0.0f, 0.0f);
+    drawPlain(4);
+    glTranslatef(-2.0f, 0.0f, -2.0f);
+    drawPlain(1);
+    glTranslatef(0.0f, 0.0f, 2.0f);
 }
 
 void drawFloorCeilingRoom()
@@ -262,6 +310,9 @@ void display()
     glTranslatef(-sideways, 0, 0);
     
     glPushMatrix();
+
+    glTranslatef(0.0f, 0.0f, -4.0f);
+
     //Drawing the floor
     glTranslatef(-4.0f, 0.0f, -4.0f); //Setting Start point
     drawFloorCeilingRoom();
@@ -270,9 +321,9 @@ void display()
     glBindTexture(GL_TEXTURE_2D, texwall);
 
     //Drawing Ceiling
-    glTranslatef(-4.0f, 12.0f, -4.0f); //Setting Start point
+    glTranslatef(-4.0f, 12.0f, -8.0f); //Setting Start point
     drawFloorCeilingRoom();
-    glTranslatef(4.0f, -12.0f, -8.0f); //Resetting back to start
+    glTranslatef(4.0f, -12.0f, -4.0f); //Resetting back to start
 
     //Drawing Front Wall
     glTranslatef(-4.0f, 0.0f, -10.0f); //Setting Start point
@@ -300,6 +351,10 @@ void display()
     glBindTexture(GL_TEXTURE_2D, texwall);
     drawPassageWalls();
     
+    //Drawing Obstacle
+    glTranslatef(objectMovement, 0.0f, 0.0f);
+    DrawCube();
+    glTranslatef(-objectMovement, 0.0f, 0.0f);
     
     glPopMatrix();
 
