@@ -85,30 +85,30 @@ void keyPressed(unsigned char key, int x, int y)
         glutPostRedisplay();
         break;
     case 'w':     /* <cursor up> */
-        if (!(advance <= -49.0f || (sideways > 1.0f && advance < -8.0f) || (sideways < -1.0f && advance < -8.0f)))
+        if ((advance > -1.0f && sideways > 5.0f) || (sideways >= 1.0f && sideways <= 5.0f && advance >= -8.5f) || (sideways <= -1.0f && advance >= -8.5f && advance < -1.0f) || (advance >= -47.0f && sideways <= 1.0f && sideways >= -1.0f) || (advance < -47.0f && advance > -49.0f && sideways < 1.0f && sideways > -40.0f))
         {
             advance -= 0.5f;
             glutPostRedisplay();
         }
         break;
     case 'a':     /* <cursor up> */
-        if (!(sideways <= -4.8f || (advance <= -8.0 && sideways <= -1.0)))
+        if ((sideways > -5.0f && advance > -8.0f) || (advance <= -8.0f && advance >= -47.0f && sideways > -1.0f) || (advance < -47.0f && sideways > -40.0f))
         {
-            sideways -= 0.2f;
+            sideways -= 0.5f;
             glutPostRedisplay();
         }
         break;
     case 's':     /* <cursor down> */
-        if (advance < 1.0f)
+        if (!(advance >= 1.0f || (advance > -48.0f && sideways < -1.0f)))
         {
             advance += 0.5f;
             glutPostRedisplay();
         }
         break;
     case 'd':     /* <cursor down> */
-        if (!(sideways >= 4.8f || (advance <= -8.0 && sideways >= 1.0)))
+        if ((advance >= -1.0f) || (sideways <= 5.0f && advance < -1.0f && advance > -8.0f) || (advance <= -8.0f && sideways < 1.0f))
         {
-            sideways += 0.2f;
+            sideways += 0.5f;
             glutPostRedisplay();
         }
         break;
@@ -234,12 +234,17 @@ void drawBackWallRoom()
     }
 }
 
-void drawSideWallRoom()
+void drawSideWallRoom(int right)
 {
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
         {
+            if (right == 1 && i == 0 && j == 0)
+            {
+                glTranslatef(0.0f, 0.0f, -4.0f);
+                continue;
+            }
             drawPlain(2);
             glTranslatef(0.0f, 0.0f, -4.0f);
         }
@@ -258,13 +263,20 @@ void drawPassageFloor()
     glTranslatef(0.0f, 0.0f, 40.0f);
 }
 
-void drawPassageWalls()
+void drawPassageWalls(int closed, int ending)
 {
     glTranslatef(-2.0f, 0.0f, 0.0f);
     //Left
     for (int i = 0; i < 10; i++)
     {
-        drawPlain(2);
+        if (closed == 1)
+        {
+            drawPlain(2);
+        }
+        else if (i != 9)
+        {
+            drawPlain(2);
+        }
         glTranslatef(0.0f, 4.0f, 0.0f);
         drawPlain(2);
         glTranslatef(0.0f, -4.0f, -4.0f);
@@ -279,12 +291,16 @@ void drawPassageWalls()
         glTranslatef(0.0f, -4.0f, -4.0f);
     }
     //Back Wall
-    glTranslatef(-2.0f, 0.0f, 2.0f);
-    drawPlain(1);
-    glTranslatef(0.0f, 4.0f, 0.0f);
-    drawPlain(1);
+    if (ending == 1)
+    {
+        glTranslatef(-2.0f, 0.0f, 2.0f);
+        drawPlain(1);
+        glTranslatef(0.0f, 4.0f, 0.0f);
+        drawPlain(1);
+        glTranslatef(2.0f, -4.0f, -2.0f);
+    }
     //Ceiling
-    glTranslatef(0.0f, 4.0f, 2.0f);
+    glTranslatef(-2.0f, 8.0f, 4.0f);
     for (int i = 0; i < 10; i++)
     {
         drawPlain(3);
@@ -338,31 +354,59 @@ void display()
 
     //Drawing Left Wall
     glTranslatef(-6.0f, 0.0f, 4.0f); //Setting Start point
-    drawSideWallRoom();
+    drawSideWallRoom(0);
     glTranslatef(6.0f, -12.0f, -4.0f); //Resetting back to start
 
     //Drawing Right Wall
     glTranslatef(6.0f, 0.0f, 4.0f); //Setting Start point
-    drawSideWallRoom();
+    drawSideWallRoom(1);
     glTranslatef(-6.0f, -12.0f, -4.0f); //Resetting back to start
 
     glBindTexture(GL_TEXTURE_2D, texfloor);
     glTranslatef(0.0f, 0.0f, -4.0f); //Setting Start point
     drawPassageFloor();
+    
+    glTranslatef(0.0f, 0.0f, -36.0f); //Startpoint for extended passage
+    glRotatef(90, 0, 1, 0);
+    drawPassageFloor();
+
     glBindTexture(GL_TEXTURE_2D, texwall);
-    drawPassageWalls();
+    drawPassageWalls(1, 1);
+    glRotatef(270, 0, 1, 0);
+    glTranslatef(0.0f, 0.0f, 36.0f);
+
+    //glBindTexture(GL_TEXTURE_2D, texwall);
+    drawPassageWalls(0, 1);
     
     //Drawing Obstacle
     glTranslatef(objectMovement, 0.0f, 0.0f);
     DrawCube();
     glTranslatef(-objectMovement, 0.0f, 0.0f);
 
-    if (advance < -40.0f)
+    //Drawing endless path
+    glTranslatef(4.0f, 0.0f, 8.0f); //Startpoint for endless passage
+    glRotatef(270, 0, 1, 0);
+
+    for (int i = 0; i < 7; i++)
+    {
+        glBindTexture(GL_TEXTURE_2D, texfloor);
+        drawPassageFloor();
+        glBindTexture(GL_TEXTURE_2D, texwall);
+        drawPassageWalls(1, 0);
+        glTranslatef(0.0f, 0.0f, -40.0f);
+    }
+    glTranslatef(0.0f, 0.0f, 280.0f); // Resetting back
+    glRotatef(90, 0, 1, 0);
+
+    if (sideways == 160)
+        sideways = 120;
+
+    if (advance < -45.0f && sideways < -15.0f)
     {
         glBindTexture(GL_TEXTURE_2D, texscare);
-        glTranslatef(0.0f, 0.0f, advance);
+        glTranslatef(sideways-8.0f, 0.0f, -47.0f);
         DrawCube();
-        glTranslatef(0.0f, 0.0f, -advance);
+        glTranslatef(-sideways-8.0f, 0.0f, -47.0f);
     }
     
     glPopMatrix();
