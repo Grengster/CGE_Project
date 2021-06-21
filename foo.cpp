@@ -10,8 +10,10 @@
 #include <stdlib.h> // for exit
 #include <stdio.h>
 #include "tga.h"
-
+#include <iostream>
+#include <cstring>
 #include <math.h>
+
 
 /* some math.h files don't define pi... */
 #ifndef M_PI
@@ -25,6 +27,13 @@
 #define cosf(x) ((float)cos((x)))
 #define atan2f(x, y) ((float)atan2((x), (y)))
 #endif 
+
+GLfloat WHITE[] = { 1, 1, 1 };
+GLfloat RED[] = { 1, 0, 0 };
+GLfloat GREEN[] = { 0, 1, 0 };
+GLfloat MAGENTA[] = { 1, 0, 1 };
+
+
 
 int window;
 float advance = 0.0f;
@@ -40,6 +49,111 @@ int begin_x = 0;        /* x value of mouse movement */
 int begin_y = 0;      /* y value of mouse movement */
 GLfloat angle_y = 0;  /* angle of spin around y axis of scene, in degrees */
 GLfloat angle_x = 0;  /* angle of spin around x axis  of scene, in degrees */
+double r, g, b;
+double l = 380;
+
+void spectral_color(double& r, double& g, double& b, double l) // RGB <- lambda l = < 380,780 > [nm]
+{
+    if (l < 380.0) r = 0.00;
+    else if (l < 400.0) r = 0.05 - 0.05 * sin(M_PI * (l - 366.0) / 33.0);
+    else if (l < 435.0) r = 0.31 * sin(M_PI * (l - 395.0) / 81.0);
+    else if (l < 460.0) r = 0.31 * sin(M_PI * (l - 412.0) / 48.0);
+    else if (l < 540.0) r = 0.00;
+    else if (l < 590.0) r = 0.99 * sin(M_PI * (l - 540.0) / 104.0);
+    else if (l < 670.0) r = 1.00 * sin(M_PI * (l - 507.0) / 182.0);
+    else if (l < 730.0) r = 0.32 - 0.32 * sin(M_PI * (l - 670.0) / 128.0);
+    else              r = 0.00;
+    if (l < 454.0) g = 0.00;
+    else if (l < 617.0) g = 0.78 * sin(M_PI * (l - 454.0) / 163.0);
+    else              g = 0.00;
+    if (l < 380.0) b = 0.00;
+    else if (l < 400.0) b = 0.14 - 0.14 * sin(M_PI * (l - 364.0) / 35.0);
+    else if (l < 445.0) b = 0.96 * sin(M_PI * (l - 395.0) / 104.0);
+    else if (l < 510.0) b = 0.96 * sin(M_PI * (l - 377.0) / 133.0);
+    else              b = 0.00;
+}
+
+bool xmax = false, ymax = false, zmax = false;
+
+void CheckCoordsX(double& x)
+{
+    if (xmax)
+    {
+        if (x < 0)
+            xmax = false;
+        x -= 0.01f;
+    }
+    else
+    {
+        if (x > 7)
+            xmax = true;
+        x += 0.01f;
+    }
+}
+
+void CheckCoordsZ(double& z)
+{
+    if (zmax)
+    {
+        if (z < -3)
+            zmax = false;
+        z -= 0.02f;
+    }
+    else
+    {
+        if (z > 7)
+            zmax = true;
+        z += 0.02f;
+    }
+}
+
+class Ball {
+    double radius;
+    GLfloat* color;
+    double maximumHeight;
+    double x;
+    double y;
+    double z;
+    int direction;
+public:
+    Ball(double r, GLfloat* c, double h, double x, double z) :
+        radius(r), color(c), maximumHeight(h), direction(-1),
+        y(h), x(x), z(z) {
+    }
+    void update() {
+        y += direction * 0.01;
+        if (y > maximumHeight) {
+            y = maximumHeight; direction = -1;
+        }
+        else if (y < radius) {
+            y = radius; direction = 1;
+        }
+        spectral_color(r, g, b, l);
+        GLfloat temp[] = { r, g, b };
+        if (l > 780) {
+            l = 380;
+        }
+        else {
+            l += 1;
+        }
+        CheckCoordsX(x);
+        CheckCoordsZ(z);
+        glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, temp);
+        glTranslated(x, y, z);
+        glutSolidSphere(radius, 30, 30);
+        glPopMatrix();
+    }
+
+};
+
+Ball balls[] = {
+  Ball(1, GREEN, 7, 0, 0),
+  Ball(0.5f, RED, 5, 1, 2),
+  Ball(0.25f, WHITE, 3, 5, 4),
+  Ball(0.75f, GREEN, 2, 2, 5)
+};
+
 
 void reportGLError(const char* msg)
 {
@@ -67,10 +181,7 @@ void resize(int width, int height)
 
 void specialKeyPressed(unsigned char key, int x, int y)
 {
-    switch (key) {
 
-
-    }
 }
 
 void keyPressed(unsigned char key, int x, int y)
@@ -131,6 +242,8 @@ void keyPressed(unsigned char key, int x, int y)
         break;
     }
 }
+
+
 
 void drawPlain(int i)
 {
@@ -319,14 +432,31 @@ void display()
         0., 0., 0.,
         0., 1., 0.);
 
+    glPushMatrix();
+    glTranslatef(-6.0f, 0.0f, -6.0f);
+
+
+
+    glPopMatrix();
+
+    glTranslatef(0, 0, -advance);
+    glTranslatef(-sideways, 0, 0);
+
+    glTranslatef(-5.0f, 0.0f, -6.0f);
+
+    for (int i = 0; i < sizeof balls / sizeof(Ball); i++) {
+        balls[i].update();
+    }
+
+    glTranslatef(5.0f, 0.0f, 6.0f);
+
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     glBindTexture(GL_TEXTURE_2D, texfloor);
 
-    glTranslatef(0, 0, -advance);
-    glTranslatef(-sideways, 0, 0);
-    
-    glPushMatrix();
+
+
+
 
     glTranslatef(0.0f, 0.0f, -4.0f);
 
@@ -377,7 +507,7 @@ void display()
 
     //glBindTexture(GL_TEXTURE_2D, texwall);
     drawPassageWalls(0, 1);
-    
+
     //Drawing Obstacle
     glTranslatef(objectMovement, 0.0f, 0.0f);
     DrawCube();
@@ -408,7 +538,6 @@ void display()
         DrawCube();
         glTranslatef(-sideways-8.0f, 0.0f, -47.0f);
     }
-    
     glPopMatrix();
 
     glDisable(GL_TEXTURE_2D);
@@ -422,6 +551,12 @@ void init(int width, int height)
     glClearDepth(1.0);
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, WHITE);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, WHITE);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, WHITE);
+    glMaterialf(GL_FRONT, GL_SHININESS, 30);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
     glShadeModel(GL_SMOOTH);
 
     resize(width, height);
@@ -430,7 +565,12 @@ void init(int width, int height)
     tgaInfo* info = 0;
     int mode;
 
-    info = tgaLoad("textures/stonefloor.tga");
+    std::string str = "textures/stonefloor.tga";
+    char* cstr = new char[str.length() + 1];
+    strcpy(cstr, str.c_str());
+    // do stuff
+    info = tgaLoad(cstr);
+    delete[] cstr;
 
     if (info->status != TGA_OK) {
         fprintf(stderr, "error loading texwall image: %d\n", info->status);
@@ -466,11 +606,13 @@ void init(int width, int height)
 
     tgaDestroy(info);
 
+    str = "textures/stonewall2.tga";
+    cstr = new char[str.length() + 1];
+    strcpy(cstr, str.c_str());
+    // do stuff
+    info = tgaLoad(cstr);
+    delete[] cstr;
 
-    //OTHER texwall HERE
-
-
-    info = tgaLoad("textures/stonewall2.tga");
 
     if (info->status != TGA_OK) {
         fprintf(stderr, "error loading texwall image: %d\n", info->status);
@@ -506,10 +648,13 @@ void init(int width, int height)
 
     tgaDestroy(info);
 
-    //OTHER texscare HERE
 
-
-    info = tgaLoad("textures/surprise.tga");
+    str = "textures/surprise.tga";
+    cstr = new char[str.length() + 1];
+    strcpy(cstr, str.c_str());
+    // do stuff
+    info = tgaLoad(cstr);
+    delete[] cstr;
 
     if (info->status != TGA_OK) {
         fprintf(stderr, "error loading texwall image: %d\n", info->status);
@@ -605,7 +750,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(&display);
     glutReshapeFunc(&resize);
     glutKeyboardFunc(&keyPressed);
-    glutSpecialFunc(&specialKeyPressed);
+    //glutSpecialFunc(&specialKeyPressed);
     init(640, 480);
     glutTimerFunc(15, timer, 1);
     glutMouseFunc(mouse);
