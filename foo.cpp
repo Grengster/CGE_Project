@@ -134,11 +134,25 @@ public:
             l = 380;
         }
         else {
-            l += 1;
+            l += 0.25;
         }
+        
+        
+        
+
         CheckCoordsX(x);
         CheckCoordsZ(z);
         glPushMatrix();
+        if (this->color == RED)
+        {
+            GLfloat light_diffuse[] = { 1, 1, 1, 1.0 };
+            GLfloat light_position[] = { x, y, z, 1 };
+            glPushMatrix();
+            glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+            glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+            glPopMatrix();
+            
+        }
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, temp);
         glTranslated(x, y, z);
         glutSolidSphere(radius, 30, 30);
@@ -248,6 +262,7 @@ void keyPressed(unsigned char key, int x, int y)
 void drawPlain(int i)
 {
     glBegin(GL_QUADS);
+
     // front face
     switch (i)
     {
@@ -433,6 +448,7 @@ void display()
         0., 1., 0.);
 
     glPushMatrix();
+
     glTranslatef(-6.0f, 0.0f, -6.0f);
 
 
@@ -449,11 +465,15 @@ void display()
     }
 
     glTranslatef(5.0f, 0.0f, 6.0f);
-
+    glMaterialfv(GL_FRONT, GL_SPECULAR, WHITE);
+    glMaterialf(GL_FRONT, GL_SHININESS, 30);
+    
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     glBindTexture(GL_TEXTURE_2D, texfloor);
-
 
 
 
@@ -466,7 +486,6 @@ void display()
     glTranslatef(4.0f, 0.0f, -4.0f); //Resetting back to start
 
     glBindTexture(GL_TEXTURE_2D, texwall);
-
     //Drawing Ceiling
     glTranslatef(-4.0f, 12.0f, -8.0f); //Setting Start point
     drawFloorCeilingRoom();
@@ -519,6 +538,7 @@ void display()
 
     for (int i = 0; i < 7; i++)
     {
+
         glBindTexture(GL_TEXTURE_2D, texfloor);
         drawPassageFloor();
         glBindTexture(GL_TEXTURE_2D, texwall);
@@ -538,6 +558,7 @@ void display()
         DrawCube();
         glTranslatef(-sideways-8.0f, 0.0f, -47.0f);
     }
+    
     glPopMatrix();
 
     glDisable(GL_TEXTURE_2D);
@@ -550,14 +571,7 @@ void init(int width, int height)
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0);
     glDepthFunc(GL_LESS);
-    glEnable(GL_DEPTH_TEST);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, WHITE);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, WHITE);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, WHITE);
-    glMaterialf(GL_FRONT, GL_SHININESS, 30);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glShadeModel(GL_SMOOTH);
+    
 
     resize(width, height);
 
@@ -592,7 +606,6 @@ void init(int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
     // Upload the texwall bitmap. 
     w = info->width;
@@ -634,7 +647,6 @@ void init(int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
     // Upload the texwall bitmap. 
     w = info->width;
@@ -676,7 +688,6 @@ void init(int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
     // Upload the texwall bitmap. 
     w = info->width;
