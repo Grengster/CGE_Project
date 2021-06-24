@@ -571,7 +571,7 @@ void init(int width, int height)
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0);
     glDepthFunc(GL_LESS);
-    
+
 
     resize(width, height);
 
@@ -579,7 +579,19 @@ void init(int width, int height)
     tgaInfo* info = 0;
     int mode;
 
-    std::string str = "textures/stonefloor.tga";
+    wchar_t path[MAX_PATH];
+    GetModuleFileNameW(NULL, path, MAX_PATH);
+    std::string projectLocation = "";
+    for (int i = 0; i < MAX_PATH; i++)
+    {
+        if (path[i] == NULL)
+            break;
+        projectLocation += path[i];
+    }
+    std::size_t pos = projectLocation.find("Debug\\CGE_Project.exe");
+    projectLocation = projectLocation.substr(0, pos);
+
+    std::string str = projectLocation + "textures/stonefloor.tga";
     char* cstr = new char[str.length() + 1];
     strcpy(cstr, str.c_str());
     // do stuff
@@ -619,7 +631,7 @@ void init(int width, int height)
 
     tgaDestroy(info);
 
-    str = "textures/stonewall2.tga";
+    str = projectLocation + "textures/stonewall2.tga";
     cstr = new char[str.length() + 1];
     strcpy(cstr, str.c_str());
     // do stuff
@@ -661,7 +673,7 @@ void init(int width, int height)
     tgaDestroy(info);
 
 
-    str = "textures/surprise.tga";
+    str = projectLocation + "textures/surprise.tga";
     cstr = new char[str.length() + 1];
     strcpy(cstr, str.c_str());
     // do stuff
