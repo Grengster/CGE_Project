@@ -43,6 +43,7 @@ GLuint texfloor;
 GLuint texwall;
 GLuint texscare;
 int animating = 1;
+bool lightsOn = true;
 
 int moving = 0;     /* flag that is true while mouse moves */
 int begin_x = 0;        /* x value of mouse movement */
@@ -143,19 +144,22 @@ public:
         CheckCoordsX(x);
         CheckCoordsZ(z);
         glPushMatrix();
+        GLfloat light_diffuse[] = { 1, 1, 1, 1.0 };
+        GLfloat light_position[] = { x, y, z, 1 };
         if (this->color == RED)
         {
-            GLfloat light_diffuse[] = { 1, 1, 1, 1.0 };
-            GLfloat light_position[] = { x, y, z, 1 };
             glPushMatrix();
             glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
             glLightfv(GL_LIGHT0, GL_POSITION, light_position);
             glPopMatrix();
             
         }
-        //glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, temp);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, temp);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, temp);
+        if(!lightsOn)
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, light_diffuse);
+        else
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, temp);
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, temp);
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, temp);
         glTranslated(x, y, z);
         glutSolidSphere(radius, 30, 30);
         glPopMatrix();
@@ -211,14 +215,21 @@ void keyPressed(unsigned char key, int x, int y)
         animating = animating ? 0 : 1;
         glutPostRedisplay();
         break;
-    case 'w':     /* <cursor up> */
+
+    case 'h':     
+        lightsOn = true;
+        break;
+    case 'j':     
+        lightsOn = false;
+        break;
+    case 'w':     
         if ((advance > -1.0f && sideways > 5.0f) || (sideways >= 1.0f && sideways <= 5.0f && advance >= -8.5f) || (sideways <= -1.0f && advance >= -8.5f && advance < -1.0f) || (advance >= -47.0f && sideways <= 1.0f && sideways >= -1.0f) || (advance < -47.0f && advance > -49.0f && sideways < 1.0f && sideways > -40.0f))
         {
             advance -= 0.5f;
             glutPostRedisplay();
         }
         break;
-    case 'a':     /* <cursor up> */
+    case 'a':     
         if ((sideways > -5.0f && advance > -8.0f) || (advance <= -8.0f && advance >= -47.0f && sideways > -1.0f) || (advance < -47.0f && sideways > -40.0f))
         {
             sideways -= 0.5f;
