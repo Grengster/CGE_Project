@@ -85,7 +85,7 @@ void CheckCoordsX(double& x)
     }
     else
     {
-        if (x > 7)
+        if (x > 10)
             xmax = true;
         x += 0.01f;
     }
@@ -95,13 +95,13 @@ void CheckCoordsZ(double& z)
 {
     if (zmax)
     {
-        if (z < -3)
+        if (z < -1)
             zmax = false;
         z -= 0.02f;
     }
     else
     {
-        if (z > 7)
+        if (z > 7.5)
             zmax = true;
         z += 0.02f;
     }
@@ -153,7 +153,9 @@ public:
             glPopMatrix();
             
         }
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, temp);
+        //glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, temp);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, temp);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, temp);
         glTranslated(x, y, z);
         glutSolidSphere(radius, 30, 30);
         glPopMatrix();
@@ -466,7 +468,7 @@ void display()
 
     glTranslatef(5.0f, 0.0f, 6.0f);
     glMaterialfv(GL_FRONT, GL_SPECULAR, WHITE);
-    glMaterialf(GL_FRONT, GL_SHININESS, 30);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30);
     
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
